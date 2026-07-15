@@ -4,6 +4,10 @@ const express = require('express')
 const app = express();
 const { headlessScrape } = require('./api');
 
+app.get('/', (req, res) => {
+	return res.status(200);
+});
+
 app.get('/api', async (req, res) => {
   const apiKey = req.query.key;
 	if (!apiKey || apiKey !== process.env.API_KEY) return res.status(401).json({ error: 'unauthorized' });
