@@ -19,10 +19,17 @@ async function headlessScrape() {
 
     const html = await page.content();
     const $ = cheerio.load(html);
-    const articleImages = $('.whatsNewItems img').map((i, el) => $(el).attr('src')).get();
-    const articleLinks = $('.whatsNewItems .syn-img a').map((i, el) => $(el).attr('href')).get();
+    const $whatsNew = $('.whatsNewItems'); // Cache the parent once
 
-    console.log(articleImages);
+    const articleImages = $whatsNew
+      .find('img')
+      .map((i, el) => $(el).attr('src'))
+      .get();
+
+    const articleLinks = $whatsNew
+      .find('.syn-img a')
+      .map((i, el) => $(el).attr('href'))
+      .get();
 
     return { images: articleImages, links: articleLinks };
 
