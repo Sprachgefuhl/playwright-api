@@ -4,6 +4,7 @@ const cheerio = require('cheerio');
 async function headlessScrape() {
   const browser = await chromium.launch({
     headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     // slowMo: 100
   });
 
@@ -15,7 +16,12 @@ async function headlessScrape() {
   const page = await context.newPage();
 
   try {
-    await page.goto(`https://www.jw.org/en/whats-new/`, { waitUntil: 'networkidle' });
+    await page.goto(`https://www.jw.org/en/whats-new/`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.whatsNewItems', { timeout: 15000 });
+    await page.waitForFunction(() => {
+      const items = document.querySelectorAll('.whatsNewItems img');
+      return items.length > 24; // adjust based on how many you expect
+    }, { timeout: 12000 });
 
     const html = await page.content();
     const $ = cheerio.load(html);
@@ -30,6 +36,8 @@ async function headlessScrape() {
       .find('.syn-img a')
       .map((i, el) => $(el).attr('href'))
       .get();
+
+    console.log(`✅ Scraped ${articleImages.length} images and ${articleLinks.length} links`);
 
     return { images: articleImages, links: articleLinks };
 
