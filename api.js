@@ -22,6 +22,8 @@ async function headlessScrape() {
     const articleImages = $('.whatsNewItems img').map((i, el) => $(el).attr('src')).get();
     const articleLinks = $('.whatsNewItems .syn-img a').map((i, el) => $(el).attr('href')).get();
 
+    console.log(articleImages);
+
     return { images: articleImages, links: articleLinks };
 
   } catch (error) {
