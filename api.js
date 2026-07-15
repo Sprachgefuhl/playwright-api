@@ -18,28 +18,31 @@ async function headlessScrape() {
   try {
     await page.goto(`https://www.jw.org/en/whats-new/`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.whatsNewItems', { timeout: 15000 });
-    await page.waitForFunction(() => {
-      const items = document.querySelectorAll('.whatsNewItems img');
-      return items.length > 24; // adjust based on how many you expect
-    }, { timeout: 12000 });
 
     const html = await page.content();
     const $ = cheerio.load(html);
     const $whatsNew = $('.whatsNewItems'); // Cache the parent once
 
-    const articleImages = $whatsNew
-      .find('img')
-      .map((i, el) => $(el).attr('src'))
+    // images
+    let images = [];
+    $whatsNew.find('.syn-img').each((i, el) => {
+      const childNode = $(el).children().first(); // Will be 'A' or 'SPAN'
+      if (childNode.prop('tagName') === 'SPAN') images.push('https://placehold.co/200x200/png?text=n/a');
+      else {
+        const src = childNode.children().first().attr('src');
+        images.push(src);
+      }
+    })
+
+    // links
+    const links = $whatsNew
+      .find('.syn-body a')
+      .map((i, el) => 'https://www.jw.org' + $(el).attr('href'))
       .get();
 
-    const articleLinks = $whatsNew
-      .find('.syn-img a')
-      .map((i, el) => $(el).attr('href'))
-      .get();
+    console.log(`✅ Scraped ${images.length} images and ${links.length} links`);
 
-    console.log(`✅ Scraped ${articleImages.length} images and ${articleLinks.length} links`);
-
-    return { images: articleImages, links: articleLinks };
+    return { images: images, links: links };
 
   } catch (error) {
     console.error('❌ Failed:', error.message);
