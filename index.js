@@ -5,7 +5,7 @@ const app = express();
 const { headlessScrape } = require('./api');
 
 app.get('/', (req, res) => {
-	return res.status(200);
+	return res.status(200).json({ success: true });
 });
 
 app.get('/api', async (req, res) => {
@@ -16,4 +16,4 @@ app.get('/api', async (req, res) => {
 	return res.status(200).json({ success: true, data: data });
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen((process.env.PORT || 3000), () => console.log('✅ Server running'));
